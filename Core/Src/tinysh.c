@@ -7,6 +7,7 @@
 
 
 #include "main.h"
+#include "tiny_sh.h"
 
 
 #ifdef SHELL_CMD
@@ -56,20 +57,7 @@ static void 		*tinysh_arg=0;
 
 
 
-
 //static tinysh_cmd_t lsetRFMode={0,"SETRF","		[PP,BB,SS,CC,TT,RR]","[22,01,09,01,04,04]",loraSetRFMode,0,0,0};
-static tinysh_cmd_t lreadMode={0,"HW","		[NONE]","[NONE]",loraReadMode,0,0,0};
-static tinysh_cmd_t lresetcmd={0,"RESET","		[NONE]","[NONE]",sysResetcmd,0,0,0};
-static tinysh_cmd_t lsetIDMode={0,"SETID","		[AABBCC]","[newGR,newID,newCH]",loraSetIDMode,0,0,0};
-static tinysh_cmd_t lsetSNMode={0,"SETSN","		[10 chars]","[SN]",loraSetSNMode,0,0,0};
-static tinysh_cmd_t lreqDEMOself={0,"SELFDEMO"," 		[00/01/02/03/04]","[DEMO]",lora_selfDemo,0,0,0};
-static tinysh_cmd_t lreqDATAself={0,"SELFDATA"," 		[NONE]","[NONE]",lora_selfData,0,0,0};
-static tinysh_cmd_t ldefaultMode={0,"DEFAULT"," 		[NONE]","[NONE]",sysDefaultMode,0,0,0};
-static tinysh_cmd_t lsendV5Mode={0,"V5SEND"," 		[AABB]","[NewGR,NewID]",lora_v5_send,0,0,0};
-static tinysh_cmd_t lchangeCHMode={0,"CH"," 		[0/1/2/3/4/5/6]","[CH]",lora_ch,0,0,0};
-static tinysh_cmd_t lchangeClientCH={0,"CLIENTRF"," 		[AABBCC]","[GR,ID,newCH]",lora_change_clientRF,0,0,0};
-static tinysh_cmd_t lreqDATAclient={0,"DATARF"," 		[AABB]","[GR,ID]",lora_dataRF,0,0,0};
-static tinysh_cmd_t lreqDEMOclient={0,"DEMO"," 		[00/01/02/03/04,GR,ID]","[DEMO,GR,ID]",lora_demoRF,0,0,0};
 
 
 void tinysh_init(void)
@@ -80,19 +68,20 @@ void tinysh_init(void)
 	//puts("type '?' or help for MANPAGE\r\n");
 
 	tinysh_set_prompt("\r\n\nSEI$");
-	//tinysh_add_command(&lsetRFMode);
-	tinysh_add_command(&lresetcmd);
-	tinysh_add_command(&lreadMode);
-	tinysh_add_command(&lsetIDMode);
-	tinysh_add_command(&lsetSNMode);
-	tinysh_add_command(&ldefaultMode);
-	tinysh_add_command(&lreqDEMOself);
-	tinysh_add_command(&lreqDATAself);
-	tinysh_add_command(&lsendV5Mode);
-	tinysh_add_command(&lchangeCHMode);
-	tinysh_add_command(&lchangeClientCH);
-	tinysh_add_command(&lreqDATAclient);
-	tinysh_add_command(&lreqDEMOclient);
+
+
+//	tinysh_add_command(&lresetcmd);
+//	tinysh_add_command(&lreadMode);
+//	tinysh_add_command(&lsetIDMode);
+//	tinysh_add_command(&lsetSNMode);
+//	tinysh_add_command(&ldefaultMode);
+//	tinysh_add_command(&lreqDEMOself);
+//	tinysh_add_command(&lreqDATAself);
+//	tinysh_add_command(&lsendV5Mode);
+//	tinysh_add_command(&lchangeCHMode);
+//	tinysh_add_command(&lchangeClientCH);
+//	tinysh_add_command(&lreqDATAclient);
+//	tinysh_add_command(&lreqDEMOclient);
 
 	//tinysh_add_command(&lsendcmd);
 	//tinysh_add_command(&lscanMode);
@@ -113,7 +102,7 @@ void tinysh_char_out(unsigned char c)
 {
   //HAL_UART_Transmit(&huart1, (uint8_t *)&c, 1, 0xFFFF);	//Use UART1
   //HAL_UART_Transmit(&hlpuart1, (uint8_t *)&c, 1, 0xFFFF);	//Use LPUART1
-  HAL_UART_Transmit(&huart4, (uint8_t *)&c, 1, 0xFFFF);		//Use UART4
+  //HAL_UART_Transmit(&huart4, (uint8_t *)&c, 1, 0xFFFF);		//Use UART4
 }
 
 static int strlen(uchar *s)	{

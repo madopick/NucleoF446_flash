@@ -29,33 +29,19 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "stdio.h"
 
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
 /* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
-
-/* USER CODE END ET */
-
 /* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
-
-/* USER CODE END EC */
-
 /* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
 
-/* USER CODE END EM */
+
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void Error_Handler(char * file, int line);
 
-/* USER CODE BEGIN EFP */
 
-/* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
@@ -72,9 +58,32 @@ void Error_Handler(void);
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
+
+#define SHELL_CMD
+
+
+/************************************************************
+ * @brief   UART callback typedef
+ *
+ * @param   data The data pointer
+ * @param   length The data length
+ ************************************************************/
+typedef void (*UARTPeriphCallback)(uint8_t *data, uint16_t length);
+
+/************************************************************
+ * @brief   UART peripheral structure.
+ *
+ * There several instance of UART in this application:
+ * UART1 :
+ * LUART1:
+ ************************************************************/
+extern const struct UARTPeriph_s
+{
+    void (*init)(uint32_t baud);
+    uint8_t (*receive)(UARTPeriphCallback callback, uint32_t timeout);
+    uint8_t (*send)(uint8_t *data, uint16_t length, uint32_t timeout);
+}UART2Periph;
 
 #ifdef __cplusplus
 }
