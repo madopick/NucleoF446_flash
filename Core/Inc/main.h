@@ -33,6 +33,7 @@ extern "C" {
 #include <string.h>
 #include "tiny_sh.h"
 #include "flashReadWrite.h"
+#include "fw_cfg.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
@@ -46,7 +47,6 @@ void Error_Handler(char * file, int line);
 
 
 /* Exported Variables --------------------------------------------------------*/
-extern struct fwCfg_t userConfig;
 
 
 /* Private defines -----------------------------------------------------------*/

@@ -54,7 +54,7 @@ static void 		*tinysh_arg=0;
 
 
 extern UART_HandleTypeDef huart2;
-
+extern struct fwCfg_t userConfig;
 
 
 //static char argumentNotmatch[] 	= "argument not match\r\n";
@@ -123,9 +123,86 @@ static void fReadCMD(int argc, char **argv)
 
 
 
+/**************************************
+ * RAM READ COMMAND	  			  *
+ **************************************/
+static void ram2ReadCMD(int argc, char **argv)
+{
+	uint32_t data32;
+
+	data32 = *(__IO uint32_t *)0x2001F000;
+	printf("0x2001F000: %ld\r\n", data32);
+
+	data32 = *(__IO uint32_t *)0x2001F004;
+	printf("0x2001F004: %ld\r\n", data32);
+
+	data32 = *(__IO uint32_t *)0x2001F008;
+	printf("0x2001F000: %ld\r\n", data32);
+
+	//printf("userConfig: %d %d %d %d \r\n", userConfig.u32_crc, userConfig.u32_crcN, userConfig.u32_len, userConfig.u32_lenN);
+}
+
+
+/**************************************
+ * RAM WRITE COMMAND	  			  *
+ **************************************/
+static void ram2WriteCMD(int argc, char **argv)
+{
+	if (argc != 2){
+		puts("RAMWRITE invalid arguments!\r\n");
+		return;
+	}else{
+
+		uint8_t len = strlen((uchar*)&argv[1][0]);
+		//printf("FWRITE: %s (%d)\r\n", (uchar*)&argv[1][0], len);
+
+		uint32_t value = (uint32_t)tinysh_dec((char*)&argv[1][0]);
+		printf("DEC (%d): %ld \r\n", len, value);
+
+
+		volatile int *point = (int *)0x2001F000;
+		*point = value;
+
+		puts("RAMWRITE complete!");
+	}
+}
+
+
+/**************************************
+ * CONFIG WRITE COMMAND	  			  *
+ **************************************/
+static void configWriteCMD(int argc, char **argv)
+{
+	if (argc != 2){
+		puts("RAMWRITE invalid arguments!\r\n");
+		return;
+	}else{
+		uint8_t len = strlen((uchar*)&argv[1][0]);
+		uint32_t value = (uint32_t)tinysh_dec((char*)&argv[1][0]);
+		printf("DEC (%d): %ld \r\n", len, value);
+
+		 userConfig.u32_crc = value;
+	}
+}
+
+
+/**************************************
+ * CONFIG READ COMMAND	  			  *
+ **************************************/
+static void configReadCMD(int argc, char **argv)
+{
+	printf("Config CRC: %ld LEN: %ld CRCN: %ld LENN: %ld\r\n", userConfig.u32_crc, userConfig.u32_len, userConfig.u32_crcN, userConfig.u32_lenN);
+	//printf("Config CRC: %ld \r\n", userConfig.u32_crc);
+}
+
+
 static tinysh_cmd_t fwritecmd={0,"FWRITE","		[NONE]","[NONE]",fWriteCMD,0,0,0};
 static tinysh_cmd_t freadcmd={0,"FREAD","		[NONE]","[NONE]",fReadCMD,0,0,0};
 static tinysh_cmd_t ferasecmd={0,"FERASE","		[NONE]","[NONE]",fEraseCMD,0,0,0};
+static tinysh_cmd_t ram2readcmd={0,"RAMREAD","		[NONE]","[NONE]",ram2ReadCMD,0,0,0};
+static tinysh_cmd_t ram2writecmd={0,"RAMWRITE","		[NONE]","[NONE]",ram2WriteCMD,0,0,0};
+static tinysh_cmd_t configWritecmd={0,"CFGWRITE","		[NONE]","[NONE]",configWriteCMD,0,0,0};
+static tinysh_cmd_t configReadcmd={0,"CFGREAD","		[NONE]","[NONE]",configReadCMD,0,0,0};
 
 void tinysh_init(void)
 {
@@ -138,6 +215,10 @@ void tinysh_init(void)
 	tinysh_add_command(&fwritecmd);
 	tinysh_add_command(&freadcmd);
 	tinysh_add_command(&ferasecmd);
+	tinysh_add_command(&ram2readcmd);
+	tinysh_add_command(&ram2writecmd);
+	tinysh_add_command(&configWritecmd);
+	tinysh_add_command(&configReadcmd);
 }
 
 

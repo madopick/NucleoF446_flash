@@ -72,10 +72,10 @@ PUTCHAR_PROTOTYPE
 ///fw_cfg
 fwCfg_t const fwCfg_default =
 {
-    0x0,                //u32_crc
-    0x0,                //u32_len
-    0x0,                //u32_crcN
-    0x0,                //u32_lenN
+    0x12,                //u32_crc
+    0x13,                //u32_len
+    0x14,                //u32_crcN
+    0x15,                //u32_lenN
     0x0,                //u16_cfgProjectId
     0x3C,               //u16_cfgVer
     0x3,                //u8_cfgPartId
@@ -220,7 +220,7 @@ int main(void)
   UART2Periph.init(9600);
 
   /* init ready */
-   printf("Peripherals Init Ready\r\n");
+  printf("Peripherals Init Ready\r\n");
 
   tinysh_init();
   /////////////////////////////////////
@@ -228,7 +228,7 @@ int main(void)
 
   /* initialize userConfig value */
   memcpy (&userConfig, &fwCfg_default, sizeof(fwCfg_t));
-
+  printf("\r\n\nuserConfig: %ld %ld %ld %ld \r\n", userConfig.u32_crc, userConfig.u32_len, userConfig.u32_crcN, userConfig.u32_lenN);
 
   /* Infinite loop */
   while (1)
