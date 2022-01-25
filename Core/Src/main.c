@@ -218,10 +218,13 @@ int main(void)
   MX_CRC_Init();
   MX_TIM1_Init();
   UART2Periph.init(9600);
-  /////////////////////////////////////
 
   /* init ready */
-  printf("Init Ready\r\n");
+   printf("Peripherals Init Ready\r\n");
+
+  tinysh_init();
+  /////////////////////////////////////
+
 
   /* initialize userConfig value */
   memcpy (&userConfig, &fwCfg_default, sizeof(fwCfg_t));

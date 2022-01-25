@@ -9,9 +9,6 @@
 
 
 /* Private define ------------------------------------------------------------*/
-#define FLASH_USER_START_ADDR   ADDR_FLASH_SECTOR_2   											/* Start @ of user Flash area */
-#define FLASH_USER_END_ADDR     ADDR_FLASH_SECTOR_7  +  GetSectorSize(ADDR_FLASH_SECTOR_7) -1 	/* End @ of user Flash area : sector start address + sector size -1 */
-
 #define DATA_32                 ((uint32_t)0x12345678)
 #define DATA_64                 ((uint64_t)0x1234567812345678)
 
@@ -117,9 +114,26 @@ uint32_t flashRead(uint32_t addr)
 HAL_StatusTypeDef flashWrite(uint32_t addr, uint32_t data)
 {
 	HAL_StatusTypeDef retval = HAL_ERROR;
+	uint32_t data32;
 
 	Address = FLASH_USER_START_ADDR;
 
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, data) == HAL_OK)
+	{
+		data32 = *(__IO uint32_t *)Address;
+
+		if(data32 == data){
+			/****************************************************************************
+			 * Lock the Flash to disable the flash control register access (recommended
+			 * to protect the FLASH memory against possible unwanted operation)
+			 ****************************************************************************/
+			HAL_FLASH_Lock();
+			retval = HAL_OK;
+		}
+	}
+
+
+#if 0
 	while (Address < FLASH_USER_END_ADDR)
 	{
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, Address, DATA_32) == HAL_OK)
@@ -132,11 +146,7 @@ HAL_StatusTypeDef flashWrite(uint32_t addr, uint32_t data)
 		 	   User can add here some code to deal with this error */
 			while (1)
 			{
-				/* Make LED3 blink (1s period) to indicate error in Write operation */
-				//BSP_LED_On(LED3);
-				//HAL_Delay(1000);
-				//BSP_LED_Off(LED3);
-				//HAL_Delay(1000);
+				Error_Handler(__FILE__, __LINE__);
 			}
 		}
 	}
@@ -167,6 +177,8 @@ HAL_StatusTypeDef flashWrite(uint32_t addr, uint32_t data)
 	  Address = Address + 4;
 	}
 
+
+
 	/*Check if there is an issue to program data*/
 	if (MemoryProgramStatus == 0)
 	{
@@ -180,6 +192,9 @@ HAL_StatusTypeDef flashWrite(uint32_t addr, uint32_t data)
 	  //BSP_LED_On(LED3);
 	  while(1);
 	}
+#endif
+
+
 
 	return retval;
 }

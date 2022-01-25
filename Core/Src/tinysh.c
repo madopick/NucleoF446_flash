@@ -52,6 +52,11 @@ static tinysh_cmd_t *root_cmd=&help_cmd;
 static tinysh_cmd_t *cur_cmd_ctx=0;
 static void 		*tinysh_arg=0;
 
+
+extern UART_HandleTypeDef huart2;
+
+
+
 //static char argumentNotmatch[] 	= "argument not match\r\n";
 //static char argumentInvalid[] 	= "invalid argument\r\n";
 
@@ -60,39 +65,79 @@ static void 		*tinysh_arg=0;
 //static tinysh_cmd_t lsetRFMode={0,"SETRF","		[PP,BB,SS,CC,TT,RR]","[22,01,09,01,04,04]",loraSetRFMode,0,0,0};
 
 
+/**************************************
+ * FLASH ERASE COMMAND	  			  *
+ **************************************/
+static void fEraseCMD(int argc, char **argv)
+{
+	if (argc > 1){
+		puts("FERASE invalid arguments!\r\n");
+		return;
+	}else{
+		flashErase();
+		puts("FERASE finish!\r\n");
+	}
+}
+
+
+/**************************************
+ * FLASH WRITE COMMAND	  			  *
+ **************************************/
+static void fWriteCMD(int argc, char **argv)
+{
+	if (argc != 2){
+		puts("FWRITE invalid arguments!\r\n");
+		return;
+	}else{
+
+		uint8_t len = strlen((uchar*)&argv[1][0]);
+		//printf("FWRITE: %s (%d)\r\n", (uchar*)&argv[1][0], len);
+
+		uint32_t value = (uint32_t)tinysh_dec((char*)&argv[1][0]);
+		printf("DEC (%d): %ld \r\n", len, value);
+
+
+		HAL_StatusTypeDef status = flashWrite(FLASH_USER_START_ADDR, value);
+		if(status == HAL_OK){
+			puts("FWRITE complete!");
+		}else{
+			puts("FWRITE fail!");
+		}
+
+	}
+}
+
+
+/**************************************
+ * FLASH READ COMMAND	  			  *
+ **************************************/
+static void fReadCMD(int argc, char **argv)
+{
+	if (argc > 1){
+		//puts(argumentNotmatch);
+		return;
+	}else{
+		printf("FREAD: %ld \r\n", flashRead(FLASH_USER_START_ADDR));
+	}
+}
+
+
+
+static tinysh_cmd_t fwritecmd={0,"FWRITE","		[NONE]","[NONE]",fWriteCMD,0,0,0};
+static tinysh_cmd_t freadcmd={0,"FREAD","		[NONE]","[NONE]",fReadCMD,0,0,0};
+static tinysh_cmd_t ferasecmd={0,"FERASE","		[NONE]","[NONE]",fEraseCMD,0,0,0};
+
 void tinysh_init(void)
 {
-	//puts("\e[1;1H\e[2J");
-	//puts("\r\n");
-	//puts("===========================| CONSOLE CMD |===============================\r\n");
-	//puts("type '?' or help for MANPAGE\r\n");
+	puts("\e[1;1H\e[2J");
+	puts("\r\n");
+	puts("===========================| CONSOLE CMD |===============================\r\n");
+	puts("type '?' or help for MANPAGE\r\n");
 
 	tinysh_set_prompt("\r\n\nSEI$");
-
-
-//	tinysh_add_command(&lresetcmd);
-//	tinysh_add_command(&lreadMode);
-//	tinysh_add_command(&lsetIDMode);
-//	tinysh_add_command(&lsetSNMode);
-//	tinysh_add_command(&ldefaultMode);
-//	tinysh_add_command(&lreqDEMOself);
-//	tinysh_add_command(&lreqDATAself);
-//	tinysh_add_command(&lsendV5Mode);
-//	tinysh_add_command(&lchangeCHMode);
-//	tinysh_add_command(&lchangeClientCH);
-//	tinysh_add_command(&lreqDATAclient);
-//	tinysh_add_command(&lreqDEMOclient);
-
-	//tinysh_add_command(&lsendcmd);
-	//tinysh_add_command(&lscanMode);
-	//tinysh_add_command(&lreadMap);
-	//tinysh_add_command(&lrxcmd);
-	//tinysh_add_command(&lfreqcmd);
-	//tinysh_add_command(&ltimecmd);
-	//tinysh_add_command(&lwritecmd);
-	//tinysh_add_command(&lreadcmd);
-	//tinysh_add_command(&ledcmd);
-	//tinysh_add_command(&stopModecmd);
+	tinysh_add_command(&fwritecmd);
+	tinysh_add_command(&freadcmd);
+	tinysh_add_command(&ferasecmd);
 }
 
 
@@ -100,9 +145,7 @@ void tinysh_init(void)
 /* few useful utilities that may be missing */
 void tinysh_char_out(unsigned char c)
 {
-  //HAL_UART_Transmit(&huart1, (uint8_t *)&c, 1, 0xFFFF);	//Use UART1
-  //HAL_UART_Transmit(&hlpuart1, (uint8_t *)&c, 1, 0xFFFF);	//Use LPUART1
-  //HAL_UART_Transmit(&huart4, (uint8_t *)&c, 1, 0xFFFF);		//Use UART4
+  HAL_UART_Transmit(&huart2, (uint8_t *)&c, 1, 0xFFFF);	//Use UART1
 }
 
 static int strlen(uchar *s)	{
@@ -132,20 +175,8 @@ static void help_fnt(int argc, char **argv)
   //puts("HW		[NONE]		READ LORA CONFIG.\r\n");
   //puts("SETRF		[P,B,S,C,T,R]	SET LORA CONFIG.\r\n");
   puts("SN		[10 chars]		SET Internal SN\r\n");
-  puts("SETID		[newGR,newID,newCH]	SET Internal GROUP, ID, CH Baru\r\n");
-  puts("SELFDEMO	[00/01/02/03/04]	SET Internal DEMO\r\n");
-  puts("SELFDATA	[NONE]			Req. Internal Data\r\n");
-  //puts("RESET		[NONE]			RESET MCU\r\n");
-  //puts("DEFAULT		[NONE]			CLEAR ALL EEPROM\r\n");
-  puts("V5SEND		[newGR,newID]		SETID Ketika EEPROM kosong\r\n");
-  puts("V5SEND		[GR,newGR,ID,newID]	SETID\r\n");
-  puts("CLIENTRF 	[GR,ID,newCH]		SET CH untuk GR dan ID\r\n");
-  puts("CH 		[0/1/2/3/4/5/6]		SET CH Sementara\r\n");
-  puts("DATARF		[GR,ID]			REQ Data\r\n");
-  puts("DEMO		[DEMO,GR,ID]		DEMO: 00,01,02,03,04 \r\n");
   puts("\r\n\n");
 
-  puts("Example:\r\n");
 }
 
 /*
@@ -769,7 +800,7 @@ unsigned long tinysh_atoxi(char *s)
 
 
 /*********************************************************************
- * @name	: tinysh_longhex
+ * @name	: tinysh_dec
  * @brief	: string to decimal conversion (1 bytes only)
  *********************************************************************/
 unsigned long tinysh_dec(char *s)
@@ -793,7 +824,7 @@ unsigned long tinysh_dec(char *s)
 	  s++;
 	  index++;
 
-	  if(index > 1){
+	  if(index > 10){
 		 break;
 	  }
   }

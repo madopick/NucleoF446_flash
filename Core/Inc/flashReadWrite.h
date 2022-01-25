@@ -25,10 +25,14 @@ extern "C" {
 #define ADDR_FLASH_SECTOR_7     ((uint32_t)0x08060000) /* Base address of Sector 7, 128 Kbytes */
 
 
+#define FLASH_USER_START_ADDR   ADDR_FLASH_SECTOR_3   											/* Start @ of user Flash area */
+#define FLASH_USER_END_ADDR     ADDR_FLASH_SECTOR_3  +  GetSectorSize(ADDR_FLASH_SECTOR_3) -1 	/* End @ of user Flash area : sector start address + sector size -1 */
 
 
-void flashStartWrite(void);
 
+uint32_t flashRead(uint32_t addr);
+HAL_StatusTypeDef flashWrite(uint32_t addr, uint32_t data);
+HAL_StatusTypeDef flashErase(void);
 
 #ifdef __cplusplus
 }

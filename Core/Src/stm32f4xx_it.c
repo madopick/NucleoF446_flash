@@ -157,7 +157,7 @@ void USART2_IRQHandler(void)
 		uint8_t data_length  = 255 - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
 
 
-#if 1
+#if 0
 		printf("UART2 Receive (%d) \r\n",data_length);
 		for(uint8_t i = 0; i < uart2_buff_len;i++)
 			printf("[%d] : %c \r\n",i,uart2Rcv_buff[i]);
@@ -165,10 +165,10 @@ void USART2_IRQHandler(void)
 #endif
 
 #ifdef SHELL_CMD
-		//for(int i = 0; i<data_length; i++){
-		//  uint8_t single_char = uart2Rcv_buff[i];
-		//  tinysh_char_in((unsigned char)single_char);
-		//}
+		for(int i = 0; i<data_length; i++){
+		  uint8_t single_char = uart2Rcv_buff[i];
+		  tinysh_char_in((unsigned char)single_char);
+		}
 #endif
 
 		//Zero Receiving Buffer
