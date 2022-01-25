@@ -48,6 +48,8 @@ extern struct fwCfg_t userConfig;
 
 
 /* Private defines -----------------------------------------------------------*/
+#define UART2_RX_BUFFER_SIZE				255
+
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2

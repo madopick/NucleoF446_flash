@@ -31,20 +31,23 @@
 CRC_HandleTypeDef hcrc;
 TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart2;
-
-///UART2
-static void _uart2_init(uint32_t baud);
-static uint8_t _uart2_receive(UARTPeriphCallback callback, uint32_t timeout);
-static uint8_t _uart2_send(uint8_t *data, uint16_t length, uint32_t timeout);
+DMA_HandleTypeDef hdma_usart2_rx;
 
 
+uint8_t uart2Rcv_buff[UART2_RX_BUFFER_SIZE];                		// UART2 RCV
+uint8_t uart2_buff_len;												// UART2 RCv Length
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CRC_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_DMA_Init(void);
 
+///UART2
+static void _uart2_init(uint32_t baud);
+static uint8_t _uart2_receive(UARTPeriphCallback callback, uint32_t timeout);
+static uint8_t _uart2_send(uint8_t *data, uint16_t length, uint32_t timeout);
 
 ///PRINTF
 #ifdef __GNUC__
@@ -153,31 +156,24 @@ static void _uart2_init(uint32_t baud)
     Error_Handler(__FILE__, __LINE__);
   }
 
-  //__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
-  //HAL_UART_Receive_DMA(&huart2, (uint8_t*)huart2Rcv_buff, UART2_RX_BUFFER_SIZE);
+  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+  HAL_UART_Receive_DMA(&huart2, (uint8_t*)uart2Rcv_buff, UART2_RX_BUFFER_SIZE);
 
 }
 
 /********************************************
-  * @name   _lpuart1_receive
-  * @brief 	LPUART1 Receive Function
+  * @name   uart2_receive
+  * @brief 	UART1 Receive Function
   *******************************************/
 static uint8_t _uart2_receive(UARTPeriphCallback callback, uint32_t timeout)
 {
-	//puts("puart2 rcv\r\n");
-//	memset(puart2Rcv_buff,'\0',sizeof(huart2Rcv_buff));
-//	f_lpuart1 = 0;
-//	lpuart2_buff_len = 0;
-//
-//	while (f_lpuart1 == 0){
-//		DelayMs(100);
-//	}
+//	puts("uart2 rcv\r\n");
+//	memset(uart2Rcv_buff,'\0',sizeof(uart2Rcv_buff));
+//	uart2_buff_len = 0;
 //
 //	if(callback != NULL){
-//		callback(lpuartRcv_buff, lpuart1_buff_len);
+//		callback(uart2Rcv_buff, uart2_buff_len);
 //	}
-
-	//printf("exit from lpuart1 rcv\r\n");
 
 	return HAL_OK;
 }
@@ -217,6 +213,7 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
   /* Initialize all configured peripherals */
+  MX_DMA_Init();
   MX_GPIO_Init();
   MX_CRC_Init();
   MX_TIM1_Init();
@@ -287,6 +284,21 @@ void SystemClock_Config(void)
   }
 }
 
+
+/*********************************************
+  * @name   MX_DMA_Init
+  * @brief 	Enable DMA controller clock
+  ********************************************/
+static void MX_DMA_Init(void)
+{
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+
+}
 
 /********************************************
   * @brief CRC Initialization Function
