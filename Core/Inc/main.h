@@ -29,7 +29,8 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
@@ -41,6 +42,9 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(char * file, int line);
 
+
+/* Exported Variables --------------------------------------------------------*/
+extern struct fwCfg_t userConfig;
 
 
 /* Private defines -----------------------------------------------------------*/

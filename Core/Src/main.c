@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "fw_cfg.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +44,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_CRC_Init(void);
 static void MX_TIM1_Init(void);
-static void MX_USART2_UART_Init(void);
 
 
 ///PRINTF
@@ -66,6 +66,65 @@ PUTCHAR_PROTOTYPE
 
 
 /* Private user code ---------------------------------------------------------*/
+///fw_cfg
+fwCfg_t const fwCfg_default =
+{
+    0x0,                //u32_crc
+    0x0,                //u32_len
+    0x0,                //u32_crcN
+    0x0,                //u32_lenN
+    0x0,                //u16_cfgProjectId
+    0x3C,               //u16_cfgVer
+    0x3,                //u8_cfgPartId
+    0x5,                //u8_cfgAfeVer
+    0x0,                //u8_reserved016
+    0x0,                //u8_reserved017
+    0x3C,               //u8_extReleaseByte0
+    0x13,               //u8_extReleaseByte1
+    0x0,                //u8_extReleaseByte2
+    0x0,                //u8_extReleaseByte3
+    0x0,                //u8_extReleaseByte4
+    0x0,                //u8_extReleaseByte5
+    0x0,                //u8_extReleaseByte6
+    0x0,                //u8_extReleaseByte7
+    0xFF,               //u8_sense0En
+    0xFF,               //u8_sense1En
+    0xFF,               //u8_sense2En
+    0xFF,               //u8_sense3En
+    0x1F,               //u8_sense4En
+    0x0,                //u8_sense5En
+    0x0,                //u8_sense6En
+    0x0,                //u8_sense7En
+    0xFF,               //u8_force0En
+    0xFF,               //u8_force1En
+    0x1,                //u8_force2En
+    0x0,                //u8_force3En
+    0x0,                //u8_force4En
+    0x0,                //u8_force5En
+    0x0,                //u8_force6En
+    0x0,                //u8_force7En
+    0x25,               //u8_senseLen
+    0x11,               //u8_forceLen
+    0x923,              //u16_scrXRes
+    0x437,              //u16_scrYRes
+	0x1,                //b1_orientSwap
+	0x1,                //b1_orientForce
+	0x0,                //b1_orientSense
+	0x1,                //b1_rptResScaleEn
+	0x0,                //b4_reserved036_4_7
+	0x923,              //u16_rptXRes
+	0x437,              //u16_rptYRes
+	0x182,              //u16_scrPpi
+	0x1,                //u8_orientRawdata
+	0x3,                //u8_scrMultiple
+	0x0,                //u8_reserved03F
+};
+
+//uint8_t __attribute__((__section__(".user_ram"))) userConfig[sizeof(fwCfg_t)];
+struct fwCfg_t userConfig __attribute__ ((section (".user_ram")));
+
+
+
 ///UART 2
 const struct UARTPeriph_s UART2Periph =
 {
@@ -88,7 +147,6 @@ static void _uart2_init(uint32_t baud)
   huart2.Init.Parity 					= UART_PARITY_NONE;
   huart2.Init.Mode 						= UART_MODE_TX_RX;
   huart2.Init.HwFlowCtl 				= UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling 				= UART_OVERSAMPLING_16;
 
   if (HAL_UART_Init(&huart2) != HAL_OK)
   {
@@ -147,30 +205,36 @@ static uint8_t _uart2_send(uint8_t *data, uint16_t length, uint32_t timeout)
 
 
 
-/**
+/*******************************************************************************
   * @brief  The application entry point.
   * @retval int
-  */
+  ******************************************************************************/
 int main(void)
 {
-  /* MCU Configuration--------------------------------------------------------*/
-
+  /// MCU Configuration
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
   /* Configure the system clock */
   SystemClock_Config();
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_CRC_Init();
   MX_TIM1_Init();
-  MX_USART2_UART_Init();
+  UART2Periph.init(9600);
+  /////////////////////////////////////
+
+  /* init ready */
+  printf("Init Ready\r\n");
+
+  /* initialize userConfig value */
+  memcpy (&userConfig, &fwCfg_default, sizeof(fwCfg_t));
+
 
   /* Infinite loop */
   while (1)
   {
-
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  HAL_Delay(1000);
   }
 }
 
@@ -276,26 +340,6 @@ static void MX_TIM1_Init(void)
 }
 
 
-/******************************************
-  * @brief USART2 Initialization Function
-  * @param None
-  * @retval None
-  *****************************************/
-static void MX_USART2_UART_Init(void)
-{
-  huart2.Instance 				= USART2;
-  huart2.Init.BaudRate 			= 115200;
-  huart2.Init.WordLength 		= UART_WORDLENGTH_8B;
-  huart2.Init.StopBits 			= UART_STOPBITS_1;
-  huart2.Init.Parity 			= UART_PARITY_NONE;
-  huart2.Init.Mode 				= UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl 		= UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling 		= UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-	  Error_Handler(__FILE__, __LINE__);
-  }
-}
 
 /*****************************************
   * @brief GPIO Initialization Function
@@ -316,15 +360,15 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pin 	= B1_Pin;
+  GPIO_InitStruct.Mode	= GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull 	= GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pin 	= LD2_Pin;
+  GPIO_InitStruct.Mode 	= GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull 	= GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
@@ -340,11 +384,11 @@ static void MX_GPIO_Init(void)
 void Error_Handler(char * file, int line)
 {
   __disable_irq();
-  printf("Error: %s, line: %d \r\n",file,line);
+  printf("\r\nERROR: %s, line: %d \r\n",file,line);
   while (1)
   {
-	  //HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_8);
-	  //HAL_Delay(100);
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  HAL_Delay(100);
   }
 }
 
