@@ -33,6 +33,12 @@ extern "C" {
 uint32_t flashRead(uint32_t addr);
 HAL_StatusTypeDef flashWrite(uint32_t addr, uint32_t data);
 HAL_StatusTypeDef flashErase(void);
+HAL_StatusTypeDef flashAreaRead(uint32_t addr, uint16_t len);
+HAL_StatusTypeDef printRAMvalue (uint32_t addr, uint16_t len);
+HAL_StatusTypeDef copyFlashToRAM (uint32_t FLASHaddr, uint32_t RAMaddr, uint16_t len);
+HAL_StatusTypeDef copyRamToFlash (uint32_t RAMaddr, uint32_t FLASHaddr, uint16_t len);
+HAL_StatusTypeDef copyFlashToRAM (uint32_t FLASHaddr, uint32_t RAMaddr, uint16_t len);
+HAL_StatusTypeDef copyRamToFlash (uint32_t RAMaddr, uint32_t FLASHaddr, uint16_t len);
 
 #ifdef __cplusplus
 }

@@ -117,7 +117,16 @@ static void fReadCMD(int argc, char **argv)
 		//puts(argumentNotmatch);
 		return;
 	}else{
-		printf("FREAD: %ld \r\n", flashRead(FLASH_USER_START_ADDR));
+		uint32_t addr = FLASH_USER_START_ADDR;
+		uint32_t value;
+		puts("FLASH READ First 60 byte in data area\r\n");
+		for(uint8_t x = 0; x < 60; x+=4){
+			value = flashRead(addr);
+			printf("4 byte: %ld, %d:x%02lX, %d:x%02lX, %d:x%02lX, %d:x%02lX\r\n",
+					value, x, (value & 0x000000ff), x+1, (value & 0x0000ff00)>>8 , x+2, (value & 0x00ff0000)>>16, x+3, (value & 0xff000000) >> 24);
+			addr +=4;
+		}
+
 	}
 }
 
@@ -169,7 +178,7 @@ static void ram2WriteCMD(int argc, char **argv)
 
 
 /**************************************
- * CONFIG WRITE COMMAND	  			  *
+ * CONFIG RAM WRITE COMMAND	  		  *
  **************************************/
 static void configWriteCMD(int argc, char **argv)
 {
@@ -181,13 +190,13 @@ static void configWriteCMD(int argc, char **argv)
 		uint32_t value = (uint32_t)tinysh_dec((char*)&argv[1][0]);
 		printf("DEC (%d): %ld \r\n", len, value);
 
-		 userConfig.u32_crc = value;
+		userConfig.u32_crc = value;
 	}
 }
 
 
 /**************************************
- * CONFIG READ COMMAND	  			  *
+ * CONFIG VARIABLE READ COMMAND	  	  *
  **************************************/
 static void configReadCMD(int argc, char **argv)
 {
@@ -196,6 +205,52 @@ static void configReadCMD(int argc, char **argv)
 }
 
 
+/**************************************************************
+ * READ FLASH in particular sector  						  *
+ * usecase: Read stored config value in FLASH_USER_START_ADDR *
+ **************************************************************/
+static void flashAreaReadCMD(int argc, char **argv)
+{
+	flashAreaRead(FLASH_USER_START_ADDR, 60);
+}
+
+
+/********************************************************
+ * Print RAM value 										*
+ * usecase: read RAM on addr 0x2001F000 (fw config)		*
+ ********************************************************/
+static void printRAMCMD(int argc, char **argv)
+{
+	printRAMvalue (0x2001F000, 60);
+}
+
+
+/********************************************************
+ * 		*
+ ********************************************************/
+static void copyToRamCMD(int argc, char **argv)
+{
+	if(copyFlashToRAM(FLASH_USER_START_ADDR, 0x2001F000, 60) == HAL_OK){
+		puts("Copy Flash to RAM OK !!!\r\n");
+	}else{
+		puts("Copy Flash to RAM FAIL !!!\r\n");
+	}
+
+}
+
+
+/********************************************************
+ * 		*
+ ********************************************************/
+static void copyToFlashCMD(int argc, char **argv)
+{
+	if(copyRamToFlash(0x2001F000, FLASH_USER_START_ADDR, 60) == HAL_OK){
+		puts("Copy RAM to FLASH OK !!!\r\n");
+	}else{
+		puts("Copy RAM to FLASH FAIL !!!\r\n");
+	}
+}
+
 static tinysh_cmd_t fwritecmd={0,"FWRITE","		[NONE]","[NONE]",fWriteCMD,0,0,0};
 static tinysh_cmd_t freadcmd={0,"FREAD","		[NONE]","[NONE]",fReadCMD,0,0,0};
 static tinysh_cmd_t ferasecmd={0,"FERASE","		[NONE]","[NONE]",fEraseCMD,0,0,0};
@@ -203,6 +258,10 @@ static tinysh_cmd_t ram2readcmd={0,"RAMREAD","		[NONE]","[NONE]",ram2ReadCMD,0,0
 static tinysh_cmd_t ram2writecmd={0,"RAMWRITE","		[NONE]","[NONE]",ram2WriteCMD,0,0,0};
 static tinysh_cmd_t configWritecmd={0,"CFGWRITE","		[NONE]","[NONE]",configWriteCMD,0,0,0};
 static tinysh_cmd_t configReadcmd={0,"CFGREAD","		[NONE]","[NONE]",configReadCMD,0,0,0};
+static tinysh_cmd_t printFlashcmd={0,"PRINTFLASH","		[NONE]","[NONE]",flashAreaReadCMD,0,0,0};
+static tinysh_cmd_t printRAMcmd={0,"PRINTRAM","		[NONE]","[NONE]",printRAMCMD,0,0,0};
+static tinysh_cmd_t copyToRAMcmd={0,"COPYTORAM","		[NONE]","[NONE]",copyToRamCMD,0,0,0};
+static tinysh_cmd_t copyToFlashcmd={0,"COPYTOFLASH","		[NONE]","[NONE]",copyToFlashCMD,0,0,0};
 
 void tinysh_init(void)
 {
@@ -219,6 +278,10 @@ void tinysh_init(void)
 	tinysh_add_command(&ram2writecmd);
 	tinysh_add_command(&configWritecmd);
 	tinysh_add_command(&configReadcmd);
+	tinysh_add_command(&printFlashcmd);
+	tinysh_add_command(&printRAMcmd);
+	tinysh_add_command(&copyToRAMcmd);
+	tinysh_add_command(&copyToFlashcmd);
 }
 
 

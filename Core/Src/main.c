@@ -72,10 +72,10 @@ PUTCHAR_PROTOTYPE
 ///fw_cfg
 fwCfg_t const fwCfg_default =
 {
-    0x12,                //u32_crc
-    0x13,                //u32_len
-    0x14,                //u32_crcN
-    0x15,                //u32_lenN
+    0x15,               //u32_crc
+    0x13,               //u32_len
+    0x14,               //u32_crcN
+    0x15,               //u32_lenN
     0x0,                //u16_cfgProjectId
     0x3C,               //u16_cfgVer
     0x3,                //u8_cfgPartId
@@ -121,6 +121,16 @@ fwCfg_t const fwCfg_default =
 	0x1,                //u8_orientRawdata
 	0x3,                //u8_scrMultiple
 	0x0,                //u8_reserved03F
+	0x1,                //b1_acalEn
+	0x1,                //b1_acalIdleSsEn
+	0x0,                //b6_reserved040_2_7
+	0x20,               //u8_acalSkipCnt
+	0x20,               //u8_acalIdleSkipCnt
+	0xA,                //u8_acalLpSkipCnt
+	0xA,                //b4_acalMsScrWgh
+	0xA,                //b4_acalMsScrLpWgh
+	0x9,                //b4_acalMsKeyWgh
+	0x9,                //b4_acalSsTchWgh
 };
 
 //uint8_t __attribute__((__section__(".user_ram"))) userConfig[sizeof(fwCfg_t)];
@@ -227,8 +237,8 @@ int main(void)
 
 
   /* initialize userConfig value */
-  memcpy (&userConfig, &fwCfg_default, sizeof(fwCfg_t));
-  printf("\r\n\nuserConfig: %ld %ld %ld %ld \r\n", userConfig.u32_crc, userConfig.u32_len, userConfig.u32_crcN, userConfig.u32_lenN);
+  //memcpy (&userConfig, &fwCfg_default, sizeof(fwCfg_t));
+  //printf("\r\n\nuserConfig: %ld %ld %ld %ld \r\n", userConfig.u32_crc, userConfig.u32_len, userConfig.u32_crcN, userConfig.u32_lenN);
 
   /* Infinite loop */
   while (1)

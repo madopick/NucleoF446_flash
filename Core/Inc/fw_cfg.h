@@ -21,14 +21,17 @@ typedef struct fwCfg_t
 {
     uint32_t u32_crc;                               //000 - crc - crc
     uint32_t u32_len;                               //004 - len - len
+
     uint32_t u32_crcN;                              //008 - crc_n - crc_n
     uint32_t u32_lenN;                              //00C - len_n - len_n
+
     uint16_t u16_cfgProjectId;                      //010 - cfg_project_id - cfg_project_id
     uint16_t u16_cfgVer;                            //012 - cfg_ver - cfg_ver
     uint8_t u8_cfgPartId;                           //014 - cfg_part_id - cfg_part_id
     uint8_t u8_cfgAfeVer;                           //015 - cfg_afe_ver - cfg_afe_ver
     uint8_t u8_reserved016;                         //016 - reserved
     uint8_t u8_reserved017;                         //017 - reserved
+
     uint8_t u8_extReleaseByte0;                     //018 - external_release_config0 - ext_release_byte0
     uint8_t u8_extReleaseByte1;                     //018 - external_release_config0 - ext_release_byte1
     uint8_t u8_extReleaseByte2;                     //018 - external_release_config0 - ext_release_byte2
@@ -37,6 +40,7 @@ typedef struct fwCfg_t
     uint8_t u8_extReleaseByte5;                     //01C - external_release_config1 - ext_release_byte5
     uint8_t u8_extReleaseByte6;                     //01C - external_release_config1 - ext_release_byte6
     uint8_t u8_extReleaseByte7;                     //01C - external_release_config1 - ext_release_byte7
+
     uint8_t u8_sense0En;                            //020 - sense0_en - sense0_en
     uint8_t u8_sense1En;                            //021 - sense1_en - sense1_en
     uint8_t u8_sense2En;                            //022 - sense2_en - sense2_en
@@ -45,6 +49,7 @@ typedef struct fwCfg_t
     uint8_t u8_sense5En;                            //025 - sense5_en - sense5_en
     uint8_t u8_sense6En;                            //026 - sense6_en - sense6_en
     uint8_t u8_sense7En;                            //027 - sense7_en - sense7_en
+
     uint8_t u8_force0En;                            //028 - force0_en - force0_en
     uint8_t u8_force1En;                            //029 - force1_en - force1_en
     uint8_t u8_force2En;                            //02A - force2_en - force2_en
@@ -53,21 +58,40 @@ typedef struct fwCfg_t
     uint8_t u8_force5En;                            //02D - force5_en - force5_en
     uint8_t u8_force6En;                            //02E - force6_en - force6_en
     uint8_t u8_force7En;                            //02F - force7_en - force7_en
+
     uint8_t u8_senseLen;                            //030 - sense_len - sense_len
     uint8_t u8_forceLen;                            //031 - force_len - force_len
     uint16_t u16_scrXRes;                           //032 - scr_x_res - scr_x_res
+
     uint16_t u16_scrYRes;                           //034 - scr_y_res - scr_y_res
     uint8_t b1_orientSwap          : 1;    			//036 - scr_orient - orient_swap
     uint8_t b1_orientForce         : 1;    			//036 - scr_orient - orient_force
+
     uint8_t b1_orientSense         : 1;    			//036 - scr_orient - orient_sense
     uint8_t b1_rptResScaleEn       : 1;    			//036 - scr_orient - rpt_res_scale_en
     uint8_t b4_reserved036_4_7     : 4;    			//036 - scr_orient - reserved
+
     uint16_t u16_rptXRes;                  			//037 - rpt_x_res - rpt_x_res
     uint16_t u16_rptYRes;                  			//039 - rpt_y_res - rpt_y_res
+
     uint16_t u16_scrPpi;                   			//03B - scr_ppi - scr_ppi
     uint8_t u8_orientRawdata;                       //03D - orient_rawdata - orient_rawdata
     uint8_t u8_scrMultiple;                         //03E - scr_multiple - scr_multiple
     uint8_t u8_reserved03F;                         //03F - reserved
+    uint8_t b1_acalEn              : 1;    			//040 - acal_cfg - acal_en
+
+    uint8_t b1_acalIdleSsEn        : 1;    			//040 - acal_cfg - acal_idle_ss_en
+    uint8_t b6_reserved040_2_7     : 6;    			//040 - acal_cfg - reserved
+    uint8_t u8_acalSkipCnt;                         //041 - acal_skip_cnt - acal_skip_cnt
+    uint8_t u8_acalIdleSkipCnt;                     //042 - acal_idle_skip_cnt - acal_idle_skip_cnt
+
+    uint8_t u8_acalLpSkipCnt;                       //043 - acal_lp_skip_cnt - acal_lp_skip_cnt
+    uint16_t b4_acalMsScrWgh       : 4;    			//044 - acal_wgh - acal_ms_scr_wgh
+
+    uint16_t b4_acalMsScrLpWgh     : 4;    			//044 - acal_wgh - acal_ms_scr_lp_wgh
+    uint16_t b4_acalMsKeyWgh       : 4;    			//044 - acal_wgh - acal_ms_key_wgh
+
+    uint16_t b4_acalSsTchWgh       : 4;    			//044 - acal_wgh - acal_ss_tch_wgh
 }fwCfg_t;
 
 
@@ -116,6 +140,15 @@ typedef struct fwCfg_t
 #define CFG_U16_SCR_PPI                     (fwCfgp->u16_scrPpi)        	//03B - scr_ppi
 #define CFG_U8_ORIENT_RAWDATA               (fwCfgp->u8_orientRawdata)  	//03D - orient_rawdata
 #define CFG_U8_SCR_MULTIPLE                 (fwCfgp->u8_scrMultiple)    	//03E - scr_multiple
+#define CFG_B1_ACAL_EN                      (fwCfgp->b1_acalEn)         	//040 - acal_cfg
+#define CFG_B1_ACAL_IDLE_SS_EN              (fwCfgp->b1_acalIdleSsEn)   	//040 - acal_cfg
+#define CFG_U8_ACAL_SKIP_CNT                (fwCfgp->u8_acalSkipCnt)    	//041 - acal_skip_cnt
+#define CFG_U8_ACAL_IDLE_SKIP_CNT           (fwCfgp->u8_acalIdleSkipCnt)    //042 - acal_idle_skip_cnt
+#define CFG_U8_ACAL_LP_SKIP_CNT             (fwCfgp->u8_acalLpSkipCnt)  	//043 - acal_lp_skip_cnt
+#define CFG_B4_ACAL_MS_SCR_WGH              (fwCfgp->b4_acalMsScrWgh)   	//044 - acal_wgh
+#define CFG_B4_ACAL_MS_SCR_LP_WGH           (fwCfgp->b4_acalMsScrLpWgh) 	//044 - acal_wgh
+#define CFG_B4_ACAL_MS_KEY_WGH              (fwCfgp->b4_acalMsKeyWgh)   	//044 - acal_wgh
+#define CFG_B4_ACAL_SS_TCH_WGH              (fwCfgp->b4_acalSsTchWgh)   	//044 - acal_wgh
 
 
 #endif /* INC_FW_CFG_H_ */

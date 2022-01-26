@@ -6,7 +6,8 @@
  */
 
 #include "flashReadWrite.h"
-
+#include "fw_cfg.h"
+#include "main.h"
 
 /* Private define ------------------------------------------------------------*/
 #define DATA_32                 ((uint32_t)0x12345678)
@@ -93,6 +94,126 @@ static uint32_t GetSector(uint32_t Address)
   }
 
   return sector;
+}
+
+
+
+/*************************************************************************
+ * @name   copyFlashToRAM
+ * @brief
+ *
+ *************************************************************************/
+HAL_StatusTypeDef copyFlashToRAM (uint32_t FLASHaddr, uint32_t RAMaddr, uint16_t len)
+{
+	HAL_StatusTypeDef retval = HAL_OK;
+	uint32_t dataReadBack;
+
+	for(uint8_t x = 0; x < len; x += 4){
+		dataReadBack  = *(__IO uint32_t *)FLASHaddr;
+
+		volatile int *point = (int *)RAMaddr;
+		*point = dataReadBack;
+
+		RAMaddr   += 4;
+		FLASHaddr += 4;
+	}
+
+	return retval;
+}
+
+
+
+/*************************************************************************
+ * @name   copyRamToFlash
+ * @brief
+ *
+ *************************************************************************/
+HAL_StatusTypeDef copyRamToFlash (uint32_t RAMaddr, uint32_t FLASHaddr, uint16_t len)
+{
+	HAL_StatusTypeDef retval = HAL_OK;
+	uint32_t dataReadBack;
+	uint32_t dataReadFlash;
+
+	uint8_t retry = 0;
+
+	/// Unlock the Flash to enable the flash control register access
+	while(HAL_FLASH_Unlock() != HAL_OK){
+		HAL_Delay(20);
+		if(retry > 5){
+			printf("\r\n");
+			break;
+		}
+		retry++;
+	}
+
+	for(uint8_t x = 0; x < len; x += 4){
+		dataReadBack  = *(__IO uint32_t *)RAMaddr;
+
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, FLASHaddr, dataReadBack) == HAL_OK){
+			dataReadFlash = *(__IO uint32_t *)FLASHaddr;
+			if (dataReadBack == dataReadFlash){
+				RAMaddr   += 4;
+				FLASHaddr += 4;
+			}else{
+				printf("Data not equal\r\n");
+				retval = HAL_ERROR;
+				return retval;
+			}
+		}else{
+			printf("Write Fail\r\n");
+			retval = HAL_ERROR;
+			return retval;
+		}
+	}
+
+	return retval;
+}
+
+
+
+/*************************************************************************
+ * @name   printRAMvalue
+ * @brief
+ *
+ *************************************************************************/
+HAL_StatusTypeDef printRAMvalue (uint32_t addr, uint16_t len)
+{
+	HAL_StatusTypeDef retval = HAL_OK;
+	uint32_t dataReadBack;
+
+	for(uint8_t x = 0; x < len; x += 4){
+		dataReadBack  = *(__IO uint32_t *)addr;
+		addr += 4;
+
+		//little endian
+		printf("Data[%d], 0: %ld, 1: %ld, 2: %ld, 3: %ld  \r\n",
+				x, (dataReadBack & 0x000000ff), (dataReadBack & 0x0000ff00)>>8 , (dataReadBack & 0x00ff0000)>>16, (dataReadBack & 0xff000000) >> 24);
+	}
+
+	return retval;
+}
+
+
+/*************************************************************************
+ * @name   flashAreaRead
+ * @brief  Read Flash Area to Flash area word by word
+ *
+ *************************************************************************/
+HAL_StatusTypeDef flashAreaRead(uint32_t addr, uint16_t len)
+{
+	HAL_StatusTypeDef retval = HAL_ERROR;
+	uint32_t dataReadBack;
+
+	for(uint8_t x = 0; x < len; x += 4){
+		dataReadBack  = *(__IO uint32_t *)addr;
+		addr += 4;
+
+		//little endian
+		printf("Data[%d], 0: %ld, 1: %ld, 2: %ld, 3: %ld  \r\n",
+				x, (dataReadBack & 0x000000ff), (dataReadBack & 0x0000ff00)>>8 , (dataReadBack & 0x00ff0000)>>16, (dataReadBack & 0xff000000) >> 24);
+	}
+
+	return retval;
 }
 
 
