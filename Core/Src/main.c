@@ -72,7 +72,7 @@ PUTCHAR_PROTOTYPE
 ///fw_cfg
 fwCfg_t const fwCfg_default =
 {
-    0x15,               //u32_crc
+    0x12,               //u32_crc
     0x13,               //u32_len
     0x14,               //u32_crcN
     0x15,               //u32_lenN

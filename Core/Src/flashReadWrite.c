@@ -181,6 +181,8 @@ HAL_StatusTypeDef printRAMvalue (uint32_t addr, uint16_t len)
 	HAL_StatusTypeDef retval = HAL_OK;
 	uint32_t dataReadBack;
 
+	printf("Display RAM value @x%lX for %d bytes\r\n", addr, len);
+
 	for(uint8_t x = 0; x < len; x += 4){
 		dataReadBack  = *(__IO uint32_t *)addr;
 		addr += 4;
@@ -203,6 +205,8 @@ HAL_StatusTypeDef flashAreaRead(uint32_t addr, uint16_t len)
 {
 	HAL_StatusTypeDef retval = HAL_ERROR;
 	uint32_t dataReadBack;
+
+	printf("Display Flash value @x%lX for %d bytes\r\n", addr, len);
 
 	for(uint8_t x = 0; x < len; x += 4){
 		dataReadBack  = *(__IO uint32_t *)addr;

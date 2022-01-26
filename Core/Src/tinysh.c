@@ -188,7 +188,7 @@ static void configWriteCMD(int argc, char **argv)
 	}else{
 		uint8_t len = strlen((uchar*)&argv[1][0]);
 		uint32_t value = (uint32_t)tinysh_dec((char*)&argv[1][0]);
-		printf("DEC (%d): %ld \r\n", len, value);
+		printf("New CRC value (%d): %ld \r\n", len, value);
 
 		userConfig.u32_crc = value;
 	}
@@ -200,8 +200,9 @@ static void configWriteCMD(int argc, char **argv)
  **************************************/
 static void configReadCMD(int argc, char **argv)
 {
-	printf("Config CRC: %ld LEN: %ld CRCN: %ld LENN: %ld\r\n", userConfig.u32_crc, userConfig.u32_len, userConfig.u32_crcN, userConfig.u32_lenN);
-	//printf("Config CRC: %ld \r\n", userConfig.u32_crc);
+	printf("Config CRC: %ld LEN: %ld CRCN: %ld LENN: %ld CFGID: %d, CFGVer: %d\r\n",
+			userConfig.u32_crc, userConfig.u32_len, userConfig.u32_crcN, userConfig.u32_lenN, userConfig.u16_cfgProjectId, userConfig.u16_cfgVer);
+
 }
 
 
@@ -270,7 +271,7 @@ void tinysh_init(void)
 	puts("===========================| CONSOLE CMD |===============================\r\n");
 	puts("type '?' or help for MANPAGE\r\n");
 
-	tinysh_set_prompt("\r\n\nSEI$");
+	tinysh_set_prompt("\r\n\nVT$");
 	tinysh_add_command(&fwritecmd);
 	tinysh_add_command(&freadcmd);
 	tinysh_add_command(&ferasecmd);
@@ -748,14 +749,14 @@ static void _tinysh_char_in(uchar c)
 	//cur_cmd_ctx=0;
 
 	  putchar('\r');
-	  puts("SEI$");
+	  puts("VT$");
 
 	  while(cur_index > 0){
 		  puts(" ");
 		  cur_index--;
 	  }
 	  putchar('\r');
-	  puts("SEI$");
+	  puts("VT$");
 	  cur_index=0;
 	  line[cur_index]=0;
   }
@@ -781,7 +782,7 @@ static void _tinysh_char_in(uchar c)
           while(cur_index-->strlen(line))
             puts("\b \b");
           putchar('\r');
-          puts("SEI$");
+          puts("VT$");
           puts((char*)line);
           cur_index=strlen(line);
           cur_buf_index=prevline;
@@ -801,7 +802,7 @@ static void _tinysh_char_in(uchar c)
 			puts("\b \b");
 		  putchar('\r');
 		  //start_of_line();
-		  puts("SEI$");
+		  puts("VT$");
 		  puts((char*)line);
 		  cur_index=strlen(line);
 		  cur_buf_index=nextline;
